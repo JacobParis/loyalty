@@ -6,3 +6,19 @@ tasks:
 ports:
   - port: 3000
     onOpen: open-browser
+
+vscode:
+  extensions:
+    - esbenp.prettier-vscode
+    - dbaeumer.vscode-eslint
+    - sleistner.vscode-fileutils
+    - eamodio.gitlens
+    - heybourn.headwind
+    - bradlc.vscode-tailwindcss
+    - spmeesseman.vscode-taskexplorer
+    - oderwat.indent-rainbow
+    - wix.vscode-import-cost
+    - cardinal90.multi-cursor-case-preserve
+    - christian-kohler.npm-intellisense
+    - christian-kohler.path-intellisense
+    - csstools.postcss
