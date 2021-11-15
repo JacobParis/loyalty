@@ -23,12 +23,7 @@ export default function Avatar({ className, size }) {
             width={size}
             height={size}
           />
-        ) : (
-          <div
-            className="avatar no-image"
-            style={{ height: size, width: size }}
-          />
-        )}
+        ) : null}
       </div>
 
       <div style={{ width: size }}>
