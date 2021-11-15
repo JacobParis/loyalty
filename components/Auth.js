@@ -1,16 +1,19 @@
-import { useState } from 'react'
-import { supabase } from '../utils/supabaseClient'
+import { useState } from "react"
+import { supabase } from "../utils/supabaseClient"
+import { useAuth } from "../components/useAuth"
+import InputGroup from "./InputGroup"
 
 export default function Auth() {
   const [loading, setLoading] = useState(false)
-  const [email, setEmail] = useState('')
+  const [email, setEmail] = useState("")
+  useAuth()
 
   const handleLogin = async (email) => {
     try {
       setLoading(true)
       const { error } = await supabase.auth.signIn({ email })
       if (error) throw error
-      alert('Check your email for the login link!')
+      alert("Check your email for the login link!")
     } catch (error) {
       alert(error.error_description || error.message)
     } finally {
@@ -19,31 +22,38 @@ export default function Auth() {
   }
 
   return (
-    <div className="row flex flex-center">
-      <div className="col-6 form-widget">
-        <h1 className="header">Loyalty</h1>
-        <p className="description">Sign in via magic link with your email below</p>
-        <div>
-          <input
-            className="inputField"
+    <div className="flex row flex-center">
+      <div className="col-6">
+        <p className="mb-4">Sign in via magic link with your email below</p>
+
+        <form
+          onSubmit={(e) => {
+            e.preventDefault()
+            handleLogin(email)
+          }}
+        >
+          <InputGroup
+            label="Email"
             type="email"
-            placeholder="Your email"
+            className="mb-4"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
-        </div>
-        <div>
-          <button
-            onClick={(e) => {
-              e.preventDefault()
-              handleLogin(email)
-            }}
-            className="button block"
-            disabled={loading}
-          >
-            <span>{loading ? 'Loading' : 'Send magic link'}</span>
-          </button>
-        </div>
+
+          <div className="mb-4">
+            <button
+              className={`border px-4 py-2 cursor-pointer rounded-md border-gray-300  ${
+                loading
+                  ? "bg-gray-100 text-gray-500"
+                  : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+              } `}
+              type="submit"
+              disabled={loading}
+            >
+              {loading ? "Loading ..." : "Send magic link"}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   )

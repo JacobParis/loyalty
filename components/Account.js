@@ -1,31 +1,8 @@
 import { useState, useEffect } from "react"
 import { supabase } from "../utils/supabaseClient"
 import Avatar from "./Avatar"
-import { useUID } from "react-uid"
+import InputGroup from "./InputGroup"
 
-function InputGroup({ label, className, disabled = false, ...props }) {
-  const id = useUID()
-
-  return (
-    <div className={className}>
-      <label
-        htmlFor={id}
-        className="mb-1 text-gray-700 font-semibold text-sm block"
-      >
-        {label}
-      </label>
-      <input
-        id={id}
-        className={`block w-56 rounded-md border-gray-300 ${
-          disabled ? "bg-gray-100 text-gray-500" : "text-gray-700"
-        }`}
-        type="text"
-        disabled={disabled}
-        {...props}
-      />
-    </div>
-  )
-}
 export default function Account({ session }) {
   const [loading, setLoading] = useState(true)
   const [username, setUsername] = useState(null)
@@ -57,7 +34,7 @@ export default function Account({ session }) {
         setAvatarUrl(data.avatar_url)
       }
     } catch (error) {
-      alert(error.message)
+      console.error(error)
     } finally {
       setLoading(false)
     }
@@ -93,9 +70,9 @@ export default function Account({ session }) {
   return (
     <div>
       <section className="mb-8">
-        <h3 className="text-2xl font-semibold mb-2"> Profile </h3>
+        <h3 className="mb-2 text-2xl font-semibold"> Profile </h3>
 
-        <p className="text-base text-gray-500 mb-4 max-w-2xl">
+        <p className="max-w-2xl mb-4 text-base text-gray-500">
           The following information will be used to set up Git configuration.
         </p>
 
@@ -138,7 +115,7 @@ export default function Account({ session }) {
       </section>
 
       <section className="mb-8">
-        <h3 className="text-2xl font-semibold mb-2"> Avatar </h3>
+        <h3 className="mb-2 text-2xl font-semibold"> Avatar </h3>
 
         <div className="mb-4">
           <Avatar
@@ -155,7 +132,7 @@ export default function Account({ session }) {
 
       <div>
         <button
-          className="button block"
+          className="block button"
           onClick={() => supabase.auth.signOut()}
         >
           Sign Out

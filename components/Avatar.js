@@ -1,35 +1,36 @@
 import { useEffect, useRef, useState } from "react"
 import { supabase } from "../utils/supabaseClient"
 import Image from "next/image"
+import {
+  useQuery,
+  useQueryClient,
+  QueryClient,
+  QueryClientProvider,
+} from "react-query"
 
 export default function Avatar({ url, className, size, onUpload }) {
-  const [avatarUrl, setAvatarUrl] = useState(null)
   const [uploading, setUploading] = useState(false)
   const uploadInput = useRef()
+
+  const { data: avatarUrl } = useQuery(["avatar", url], async () => {
+    try {
+      const { data, error } = await supabase.storage
+        .from("avatars")
+        .download(url)
+      if (error) {
+        throw error
+      }
+
+      return URL.createObjectURL(data)
+    } catch (error) {
+      console.log("Error downloading image: ", error.message)
+    }
+  })
 
   const clickUploadInput = () => {
     if (!uploadInput.current) return
 
     uploadInput.current.click()
-  }
-
-  useEffect(() => {
-    if (url) downloadImage(url)
-  }, [url])
-
-  async function downloadImage(path) {
-    try {
-      const { data, error } = await supabase.storage
-        .from("avatars")
-        .download(path)
-      if (error) {
-        throw error
-      }
-      const url = URL.createObjectURL(data)
-      setAvatarUrl(url)
-    } catch (error) {
-      console.log("Error downloading image: ", error.message)
-    }
   }
 
   async function uploadAvatar(event) {
