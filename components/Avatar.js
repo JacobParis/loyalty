@@ -1,66 +1,16 @@
-import { useEffect, useRef, useState } from "react"
+import { useRef, useState } from "react"
 import { supabase } from "../utils/supabaseClient"
 import Image from "next/image"
-import {
-  useQuery,
-  useQueryClient,
-  QueryClient,
-  QueryClientProvider,
-} from "react-query"
+import { useQuery, useMutation, useQueryClient } from "react-query"
 
-export default function Avatar({ url, className, size, onUpload }) {
-  const [uploading, setUploading] = useState(false)
+export default function Avatar({ className, size }) {
+  const [uploading] = useState(false)
+  const formRef = useRef()
   const uploadInput = useRef()
 
-  const { data: avatarUrl } = useQuery(["avatar", url], async () => {
-    try {
-      const { data, error } = await supabase.storage
-        .from("avatars")
-        .download(url)
-      if (error) {
-        throw error
-      }
+  const user = supabase.auth.user()
 
-      return URL.createObjectURL(data)
-    } catch (error) {
-      console.log("Error downloading image: ", error.message)
-    }
-  })
-
-  const clickUploadInput = () => {
-    if (!uploadInput.current) return
-
-    uploadInput.current.click()
-  }
-
-  async function uploadAvatar(event) {
-    try {
-      setUploading(true)
-
-      if (!event.target.files || event.target.files.length === 0) {
-        throw new Error("You must select an image to upload.")
-      }
-
-      const file = event.target.files[0]
-      const fileExt = file.name.split(".").pop()
-      const fileName = `${Math.random()}.${fileExt}`
-      const filePath = `${fileName}`
-
-      let { error: uploadError } = await supabase.storage
-        .from("avatars")
-        .upload(filePath, file)
-
-      if (uploadError) {
-        throw uploadError
-      }
-
-      onUpload(filePath)
-    } catch (error) {
-      alert(error.message)
-    } finally {
-      setUploading(false)
-    }
-  }
+  const [avatarUrl, updateAvatarMutation] = useAvatar(user)
 
   return (
     <div>
@@ -80,27 +30,116 @@ export default function Avatar({ url, className, size, onUpload }) {
           />
         )}
       </div>
+
       <div style={{ width: size }}>
-        <button
-          className={`border px-4 py-2 cursor-pointer rounded-md border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-gray-900`}
-          htmlFor="single"
-          onClick={clickUploadInput}
-        >
-          {uploading ? "Uploading ..." : "Change image"}
-        </button>
-        <input
-          ref={uploadInput}
-          style={{
-            visibility: "hidden",
-            position: "absolute",
+        <form
+          ref={formRef}
+          onSubmit={(event) => {
+            event.preventDefault()
+            const form = new FormData(event.target)
+
+            updateAvatarMutation.mutate({
+              file: form.get("file"),
+            })
           }}
-          type="file"
-          id="single"
-          accept="image/*"
-          onChange={uploadAvatar}
-          disabled={uploading}
-        />
+        >
+          <button
+            className={`border px-4 py-2 cursor-pointer rounded-md border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-gray-900`}
+            htmlFor="single"
+            type="button"
+            onClick={() => {
+              uploadInput.current.click()
+            }}
+          >
+            {uploading ? "Uploading ..." : "Change image"}
+          </button>
+
+          <input
+            ref={uploadInput}
+            name="file"
+            style={{
+              visibility: "hidden",
+              position: "absolute",
+            }}
+            type="file"
+            id="single"
+            accept="image/*"
+            onChange={(e) => {
+              formRef.current.requestSubmit()
+            }}
+            disabled={uploading}
+          />
+        </form>
       </div>
     </div>
   )
+}
+
+function useAvatar(user) {
+  const queryClient = useQueryClient()
+
+  const { data: avatarUrl } = useQuery(["avatar"], async () => {
+    try {
+      const {
+        data: { avatar_url },
+      } = await supabase
+        .from("accounts")
+        .select(`avatar_url`)
+        .eq("id", user.id)
+        .single()
+
+      const { data, error } = await supabase.storage
+        .from("avatars")
+        .download(avatar_url)
+
+      if (error) {
+        throw error
+      }
+
+      return URL.createObjectURL(data)
+    } catch (error) {
+      console.log("Error downloading image: ", error.message)
+    }
+  })
+
+  const updateAvatarMutation = useMutation(
+    async ({ file }) => {
+      if (!file) {
+        throw new Error("You must select an image to upload.")
+      }
+
+      const fileExt = file.name.split(".").pop()
+      const fileName = `${Math.random()}.${fileExt}`
+
+      let { error: uploadError } = await supabase.storage
+        .from("avatars")
+        .upload(fileName, file)
+
+      if (uploadError) {
+        throw uploadError
+      }
+
+      let { error } = await supabase.from("accounts").upsert(
+        {
+          id: user.id,
+          avatar_url: fileName,
+          updated_at: new Date(),
+        },
+        {
+          returning: "minimal", // Don't return the value after inserting
+        }
+      )
+
+      if (error) {
+        throw error
+      }
+    },
+    {
+      onSuccess() {
+        queryClient.invalidateQueries(["avatar"])
+      },
+    }
+  )
+
+  return [avatarUrl, updateAvatarMutation]
 }

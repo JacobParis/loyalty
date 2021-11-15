@@ -11,7 +11,7 @@ export default function TopBar() {
       {session && session.user ? (
         <div>
           <span className="inline-block px-2 py-1 mx-1 font-semibold text-gray-700 rounded-md cursor-pointer hover:bg-gray-100">
-            <Link href="/account">Profile</Link>
+            <Link href="/account">Account</Link>
           </span>
 
           <button

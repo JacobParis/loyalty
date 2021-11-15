@@ -1,6 +1,5 @@
 import { supabase } from "../utils/supabaseClient"
 import Account from "../components/Account"
-import Link from "next/link"
 
 import { QueryClient, QueryClientProvider } from "react-query"
 
@@ -26,12 +25,12 @@ export default function Home({ session: defaultSession }) {
           </div>
         </div>
 
-        <header className="border-t border-b py-8">
+        <header className="py-8 border-t border-b">
           <PageWidth>
-            <h1 className="text-5xl tracking-tight font-bold text-gray-900 mb-2">
+            <h1 className="mb-2 text-5xl font-bold tracking-tight text-gray-900">
               Account
             </h1>
-            <h2 className="tracking-wide  text-gray-600">Manage account</h2>
+            <h2 className="tracking-wide text-gray-600">Manage account</h2>
           </PageWidth>
         </header>
 

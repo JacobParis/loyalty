@@ -1,16 +1,8 @@
-import { useState, useEffect } from "react"
 import { supabase } from "../utils/supabaseClient"
 import Auth from "../components/Auth"
-import Account from "../components/Account"
 import Link from "next/link"
-import Image from "next/image"
 
-import {
-  useQuery,
-  useQueryClient,
-  QueryClient,
-  QueryClientProvider,
-} from "react-query"
+import { QueryClient, QueryClientProvider } from "react-query"
 
 const queryClient = new QueryClient()
 
