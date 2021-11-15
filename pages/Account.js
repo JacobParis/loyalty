@@ -1,12 +1,11 @@
 import { useMutation, useQuery } from "react-query"
-import { supabase } from "../utils/supabaseClient"
-import Avatar from "./Avatar"
-import InputGroup from "./InputGroup"
+import { supabase } from "./supabaseClient"
+import { InputGroup } from "./InputGroup"
 
-export default function Account({ session }) {
+export function Account({ session }) {
   const user = supabase.auth.user()
 
-  const [data, updateProfileMutation] = useAccount(user)
+  const [{ data, isLoading }, mutation] = useAccount(user)
 
   return (
     <div>
@@ -22,7 +21,7 @@ export default function Account({ session }) {
             onSubmit={(event) => {
               const form = new FormData(event.target)
 
-              updateProfileMutation.mutate({
+              mutation.mutate({
                 username: form.get("username"),
                 website: form.get("website"),
               })
@@ -67,27 +66,12 @@ export default function Account({ session }) {
           </form>
         ) : null}
       </section>
-
-      <section className="mb-8">
-        <h3 className="mb-2 text-2xl font-semibold"> Avatar </h3>
-
-        <div className="mb-4">
-          {data ? (
-            <Avatar
-              className="rounded-md"
-              name="avatar"
-              url={data.avatar_url}
-              size={150}
-            />
-          ) : null}
-        </div>
-      </section>
     </div>
   )
 }
 
 function useAccount(user) {
-  const { data, isLoading } = useQuery(["account"], async () => {
+  const query = useQuery(["account"], async () => {
     let { data, error, status } = await supabase
       .from("accounts")
       .select(`username, website, avatar_url`)
@@ -101,26 +85,24 @@ function useAccount(user) {
     return data
   })
 
-  const updateProfileMutation = useMutation(
-    async ({ username, website } = {}) => {
-      const user = supabase.auth.user()
+  const mutation = useMutation(async ({ username, website } = {}) => {
+    const user = supabase.auth.user()
 
-      const updates = {
-        id: user.id,
-        username,
-        website,
-        updated_at: new Date(),
-      }
-
-      let { error } = await supabase.from("accounts").upsert(updates, {
-        returning: "minimal", // Don't return the value after inserting
-      })
-
-      if (error) {
-        throw error
-      }
+    const updates = {
+      id: user.id,
+      username,
+      website,
+      updated_at: new Date(),
     }
-  )
 
-  return [data, updateProfileMutation]
+    let { error } = await supabase.from("accounts").upsert(updates, {
+      returning: "minimal", // Don't return the value after inserting
+    })
+
+    if (error) {
+      throw error
+    }
+  })
+
+  return [query, mutation]
 }

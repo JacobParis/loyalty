@@ -1,6 +1,6 @@
 import { useState } from "react"
-import { supabase } from "../utils/supabaseClient"
-import { useAuth } from "../components/useAuth"
+import { supabase } from "./supabaseClient"
+import { useAuth } from "./useAuth"
 import InputGroup from "./InputGroup"
 
 export default function Auth() {

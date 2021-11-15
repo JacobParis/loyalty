@@ -1,7 +1,8 @@
-import { supabase } from "../utils/supabaseClient"
+import { supabase } from "./supabaseClient"
 import Link from "next/link"
 import { useAuth } from "./useAuth"
-export default function TopBar() {
+
+export function TopBar() {
   const session = useAuth()
 
   return (
