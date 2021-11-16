@@ -3,22 +3,9 @@ import { Account } from "./Account"
 import { Avatar } from "./Avatar"
 import { PageWidth } from "./PageWidth"
 
-import { useAuth } from "./useAuth"
-import { TopBar } from "./TopBar"
-
-export default function Home({ session: defaultSession }) {
-  const session = useAuth(defaultSession)
-
+export default function Home({ user }) {
   return (
     <div>
-      <div className="py-2">
-        <div className="py-2">
-          <PageWidth>
-            <TopBar />
-          </PageWidth>
-        </div>
-      </div>
-
       <header className="py-8 border-t border-b">
         <PageWidth>
           <h1 className="mb-2 text-5xl font-bold tracking-tight text-gray-900">
@@ -29,9 +16,9 @@ export default function Home({ session: defaultSession }) {
       </header>
 
       <main className="py-8">
-        {session && session.user ? (
+        {user ? (
           <PageWidth>
-            <Account key={session.user.id} session={session} />
+            <Account key={user.id} />
             <Avatar className="rounded-md" size={150} />
           </PageWidth>
         ) : null}
@@ -41,25 +28,17 @@ export default function Home({ session: defaultSession }) {
 }
 
 export async function getServerSideProps({ req }) {
-  try {
-    const session = await supabase.auth.api.getUserByCookie(req)
+  const { user } = await supabase.auth.api.getUserByCookie(req)
 
-    if (!session.user) {
-      return {
-        redirect: {
-          destination: "/login",
-          permanent: false,
-        },
-      }
-    }
-
+  if (!user) {
     return {
-      props: {
-        session,
+      props: {},
+      redirect: {
+        destination: "/login",
+        permanent: false,
       },
     }
-  } catch (err) {
-    console.error(err)
-    throw new Error("Unsupported error")
   }
+
+  return { props: { user } }
 }

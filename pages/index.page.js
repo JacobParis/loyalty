@@ -1,15 +1,8 @@
 import { PageWidth } from "./PageWidth"
-import { TopBar } from "./TopBar"
 
 export default function Home() {
   return (
     <div>
-      <div className="py-2">
-        <PageWidth>
-          <TopBar />
-        </PageWidth>
-      </div>
-
       <header className="py-8 border-t border-b">
         <PageWidth>
           <h1 className="mb-2 text-5xl font-bold tracking-tight text-gray-900">

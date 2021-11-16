@@ -1,12 +1,10 @@
 import { useState } from "react"
 import { supabase } from "./supabaseClient"
-import { useAuth } from "./useAuth"
-import InputGroup from "./InputGroup"
+import { InputGroup } from "./InputGroup"
 
-export default function Auth() {
+export function Auth() {
   const [loading, setLoading] = useState(false)
   const [email, setEmail] = useState("")
-  useAuth()
 
   const handleLogin = async (email) => {
     try {

@@ -2,7 +2,8 @@ import { useMutation, useQuery } from "react-query"
 import { supabase } from "./supabaseClient"
 import { InputGroup } from "./InputGroup"
 
-export function Account({ session }) {
+export function Account() {
+  const session = supabase.auth.session()
   const user = supabase.auth.user()
 
   const [{ data, isLoading }, mutation] = useAccount(user)

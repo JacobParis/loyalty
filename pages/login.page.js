@@ -1,19 +1,10 @@
 import { supabase } from "./supabaseClient"
-import Auth from "./Auth"
+import { Auth } from "./Auth"
 import { PageWidth } from "./PageWidth"
-import Link from "next/link"
 
 export default function Home() {
   return (
     <div>
-      <div className="py-2">
-        <PageWidth>
-          <div className="flex justify-between align-center">
-            <Link href="/">Loyalty</Link>
-          </div>
-        </PageWidth>
-      </div>
-
       <header className="py-8 border-t border-b">
         <PageWidth>
           <h1 className="mb-2 text-5xl font-bold tracking-tight text-gray-900">
@@ -35,23 +26,18 @@ export default function Home() {
 }
 
 export async function getServerSideProps({ req }) {
-  try {
-    const session = await supabase.auth.api.getUserByCookie(req)
+  const session = await supabase.auth.api.getUserByCookie(req)
 
-    if (session.user) {
-      return {
-        redirect: {
-          destination: "/account",
-          permanent: false,
-        },
-      }
-    }
-
+  if (session.user) {
     return {
-      props: {},
+      redirect: {
+        destination: "/account",
+        permanent: false,
+      },
     }
-  } catch (err) {
-    console.error(err)
-    throw new Error("Unsupported error")
+  }
+
+  return {
+    props: {},
   }
 }

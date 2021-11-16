@@ -3,7 +3,7 @@ import Link from "next/link"
 import { useAuth } from "./useAuth"
 
 export function TopBar() {
-  const session = useAuth()
+  const session = useAuth(supabase.auth.session())
 
   return (
     <div className="flex justify-between align-center">
@@ -26,7 +26,13 @@ export function TopBar() {
             Log out
           </button>
         </div>
-      ) : null}
+      ) : (
+        <div>
+          <span className="inline-block px-2 py-1 mx-1 font-semibold text-gray-700 rounded-md cursor-pointer hover:bg-gray-100">
+            <Link href="/login">Log in</Link>
+          </span>
+        </div>
+      )}
     </div>
   )
 }

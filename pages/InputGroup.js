@@ -1,11 +1,6 @@
 import { useUID } from "react-uid"
 
-export default function InputGroup({
-  label,
-  className,
-  disabled = false,
-  ...props
-}) {
+export function InputGroup({ label, className, disabled = false, ...props }) {
   const id = useUID()
 
   return (
