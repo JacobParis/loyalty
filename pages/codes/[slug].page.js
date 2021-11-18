@@ -1,20 +1,38 @@
 import { useState } from "react"
 import { useQuery } from "react-query"
-import { PageWidth } from "./PageWidth"
-import { supabase } from "./supabaseClient"
+import { PageWidth } from "../PageWidth"
+import { supabase } from "../supabaseClient"
 import Link from "next/link"
 
 import { useRouter } from "next/router"
 
-export default function Home() {
+export async function getServerSideProps({ params }) {
+  let { data, error, status } = await supabase
+    .from("codes")
+    .select(`id, active, name`)
+    .eq("id", params.slug)
+    .single()
+
+  return {
+    props: {
+      code: data,
+    },
+  }
+}
+
+export default function Code({ code }) {
+  const name = code.name || code.id.slice(0, 4)
+  const link = `http://localhost:3000/codes/${code.id}`
+
   const {
-    data: codes,
+    data: names,
     isLoading,
     isError,
-  } = useQuery(["codes"], async () => {
+  } = useQuery(["codes", code.id, "names"], async () => {
     let { data, error, status } = await supabase
-      .from("codes")
-      .select(`id, active, name`)
+      .from("profiles")
+      .select(`id, name`)
+      .eq("code_id", code.id)
 
     if (error && status !== 406) {
       throw error
@@ -23,28 +41,40 @@ export default function Home() {
     return data
   })
 
-  console.log(codes)
   return (
     <div>
-      <header className="py-8 border-t border-b">
+      <main className="px-4 py-4">
         <PageWidth>
-          <h1 className="mb-2 text-5xl font-bold tracking-tight text-gray-900">
-            Home
-          </h1>
-          <h2 className="tracking-wide text-gray-600">Manage account</h2>
-        </PageWidth>
-      </header>
+          <div className="px-4 py-2 mb-8 rounded-lg shadow-sm bg-gray-50">
+            <h1 className="mb-4 text-5xl font-bold tracking-tight text-gray-900">
+              Membership
+            </h1>
 
-      <main>
-        {isLoading ? (
-          <span> Loading </span>
-        ) : (
-          <ul className="grid gap-4 px-4 py-2">
-            {codes
-              ? codes.map((code) => <CodeCard code={code} key={code.id} />)
+            {names
+              ? names.map((name) => (
+                  <h3 className="mb-2 text-2xl font-semibold" key={name.id}>
+                    {" "}
+                    {name.name}{" "}
+                  </h3>
+                ))
               : null}
-          </ul>
-        )}
+
+            <h2 className="tracking-wide text-gray-600">
+              This membership is
+              <span className="font-bold"> currently active </span>
+            </h2>
+          </div>
+
+          <div className="flex flex-col items-center px-2">
+            <div className="border-8 border-white rounded-md">
+              <QRCode value={link} size={196} />
+            </div>
+            <p className="px-2 mb-4 tracking-wide text-gray-600">
+              {" "}
+              Scan with your mobile device{" "}
+            </p>
+          </div>
+        </PageWidth>
       </main>
     </div>
   )
@@ -60,7 +90,7 @@ function CodeCard({ code }) {
   const flipped = router.query.popup === code.id
 
   const name = code.name || code.id.slice(0, 4)
-  const link = `http://localhost:3000/codes/${code.id}`
+  const link = `https://localhost:3000/codes/${code.id}`
 
   const close = () => router.replace({ query: {} })
   return (
